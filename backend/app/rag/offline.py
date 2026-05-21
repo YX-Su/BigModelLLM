@@ -26,9 +26,6 @@ logger = logging.getLogger(__name__)
 
 _EMBED_BATCH = 32
 
-CHUNK_OUTPUT_FIELDS = ["text", "title", "doc", "section", "config_codes"]
-ENTITY_OUTPUT_FIELDS = ["name", "type", "dimension", "description"]
-
 
 def _batch_embed(texts: list[str]) -> list[list[float]]:
     """Embed texts in batches to stay within provider request limits."""

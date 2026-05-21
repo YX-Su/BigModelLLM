@@ -19,6 +19,10 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Metadata fields stored alongside vectors and requested back on search.
+CHUNK_OUTPUT_FIELDS = ["text", "title", "doc", "section", "config_codes"]
+ENTITY_OUTPUT_FIELDS = ["name", "type", "dimension", "description"]
+
 
 class VectorStore:
     """Thin wrapper over :class:`MilvusClient` for collection-keyed access."""

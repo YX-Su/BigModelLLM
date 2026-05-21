@@ -18,8 +18,11 @@ from app.config import settings
 from app.core.llm import embed, embed_one
 from app.graph.store import get_graph_store
 from app.rag.keyword_store import get_keyword_store
-from app.rag.offline import CHUNK_OUTPUT_FIELDS, ENTITY_OUTPUT_FIELDS
-from app.rag.vector_store import get_vector_store
+from app.rag.vector_store import (
+    CHUNK_OUTPUT_FIELDS,
+    ENTITY_OUTPUT_FIELDS,
+    get_vector_store,
+)
 from app.schemas.knowledge import Entity, Relation
 from app.schemas.retrieval import RetrievalResult, ScoredChunk
 

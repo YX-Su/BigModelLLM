@@ -72,13 +72,42 @@ pip install -r requirements.txt
 # 3. 配置环境变量
 cp .env.example .env   # 填入 OpenAI 兼容接口的 BASE_URL / API_KEY
 
-# 4. 启动服务
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# 4. 构建离线索引(语义切块 / 向量索引 / BM25 索引 / 知识图谱 / 实体索引)
+cd .. && python scripts/build_offline.py
+
+# 5. 启动后端服务
+cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+
+启动前端(另开终端):
+
+```bash
+cd frontend
+npm install
+cp .env.example .env   # 默认指向 http://localhost:8000
+npm run dev            # 访问 http://localhost:5173
+```
+
+## 测评
+
+```bash
+python scripts/evaluate.py --all
+```
+
+输出意图识别准确率、RAG 召回率(图谱前后对比)与生成准确率。指标口径见
+[`docs/evaluation.md`](docs/evaluation.md)。
+
+## 文档
+
+- [系统架构](docs/architecture.md) — 离线与在线两阶段的完整架构
+- [领域建模](docs/domain_model.md) — 知识图谱实体与关系 Schema
+- [在线推理链路示例](docs/inference_walkthrough.md) — 一条查询的完整链路追踪
+- [测评体系](docs/evaluation.md) — 过程指标与结果指标口径
 
 ## 技术栈
 
 - **后端**:Python + FastAPI
+- **前端**:React + TypeScript + Vite
 - **向量库**:Milvus(chunk 索引 + 实体索引)
 - **关键词索引**:Elasticsearch(BM25)
 - **知识图谱**:Neo4j(Cypher)
