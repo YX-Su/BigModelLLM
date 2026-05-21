@@ -1,0 +1,38 @@
+[
+  {
+    "query": "为一位保守型、计划两年内用钱的客户配置一套投资组合方案",
+    "must_codes": ["RP-CONSERVATIVE"],
+    "forbidden_codes": ["STRAT-LEVERAGE", "ASSET-QDII"],
+    "criteria": "方案应以本金安全与流动性为主,配置货币基金或债券基金,不开启杠杆与海外资产"
+  },
+  {
+    "query": "给一位进取型、长期投资的客户设计一套成长型组合",
+    "must_codes": ["RP-AGGRESSIVE"],
+    "forbidden_codes": ["RP-CONSERVATIVE"],
+    "criteria": "方案应以权益类资产为收益主力,可配置再平衡与止盈止损风控"
+  },
+  {
+    "query": "帮一位平衡型客户做一套养老储备组合",
+    "must_codes": ["HORIZON-LONG"],
+    "forbidden_codes": ["HORIZON-SHORT"],
+    "criteria": "方案应面向长期,包含养老金账户或保险理财等长期配置"
+  },
+  {
+    "query": "客户要求随时能取用资金,帮他配一套稳健组合",
+    "must_codes": ["RISK-LIQUIDITY"],
+    "forbidden_codes": ["RISK-LOCKUP"],
+    "criteria": "方案应保证流动性,不配置长期锁定产品"
+  },
+  {
+    "query": "现有进取型组合波动太大,帮我优化降低回撤",
+    "must_codes": [],
+    "forbidden_codes": ["STRAT-LEVERAGE"],
+    "criteria": "优化方向应降低权益占比或补充止损线等下行保护,不应引入杠杆"
+  },
+  {
+    "query": "把一个保守型客户的方案优化得收益高一些",
+    "must_codes": ["RP-CONSERVATIVE"],
+    "forbidden_codes": ["STRAT-LEVERAGE"],
+    "criteria": "在保持保守型约束的前提下优化收益,不得违反保守型与杠杆互斥规则"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "query": "股票型基金在投资组合里起什么作用",
+    "gold_codes": ["ASSET-EQUITY"]
+  },
+  {
+    "query": "保守型客户能不能开启杠杆",
+    "gold_codes": ["RP-CONSERVATIVE", "STRAT-LEVERAGE"]
+  },
+  {
+    "query": "定投和一次性买入有什么不同",
+    "gold_codes": ["STRAT-DCA", "STRAT-LUMPSUM"]
+  },
+  {
+    "query": "怎么保证投资组合的流动性",
+    "gold_codes": ["ASSET-MONEY", "RISK-LIQUIDITY"]
+  },
+  {
+    "query": "想做季度再平衡需要满足什么前提",
+    "gold_codes": ["STRAT-REBAL-Q", "ASSET-EQUITY", "ASSET-HYBRID"]
+  },
+  {
+    "query": "黄金配置在组合中的意义",
+    "gold_codes": ["ASSET-GOLD"]
+  },
+  {
+    "query": "个人养老金账户配置有哪些要求",
+    "gold_codes": ["ASSET-PENSION", "HORIZON-LONG"]
+  },
+  {
+    "query": "止盈线要怎么设置才合理",
+    "gold_codes": ["RISK-TAKEPROFIT", "ASSET-EQUITY"]
+  },
+  {
+    "query": "长期锁定和流动性保障可以同时开吗",
+    "gold_codes": ["RISK-LOCKUP", "RISK-LIQUIDITY"]
+  },
+  {
+    "query": "QDII海外资产适合哪些客户",
+    "gold_codes": ["ASSET-QDII", "RP-BALANCED", "RP-AGGRESSIVE"]
+  },
+  {
+    "query": "进取型成长组合一般怎么搭",
+    "gold_codes": ["RP-AGGRESSIVE", "ASSET-EQUITY"]
+  },
+  {
+    "query": "开启分红再投资有什么前提条件",
+    "gold_codes": ["STRAT-DIVREINVEST", "ASSET-BOND", "ASSET-EQUITY", "ASSET-HYBRID"]
+  }
+]

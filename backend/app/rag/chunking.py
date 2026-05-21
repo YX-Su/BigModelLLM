@@ -17,7 +17,7 @@ from app.schemas.knowledge import Chunk
 _CONFIG_CODE_RE = re.compile(r"\b(?:RP|HORIZON|ASSET|STRAT|RISK)(?:-[A-Z0-9]+)+\b")
 
 
-def _extract_codes(text: str) -> list[str]:
+def extract_config_codes(text: str) -> list[str]:
     """Return the distinct config item codes mentioned in a piece of text."""
     seen: list[str] = []
     for match in _CONFIG_CODE_RE.findall(text):
@@ -48,7 +48,7 @@ def chunk_file(path: Path) -> list[Chunk]:
                 section=section,
                 title=title,
                 text=text.strip(),
-                config_codes=_extract_codes(text),
+                config_codes=extract_config_codes(text),
             )
         )
         seq += 1

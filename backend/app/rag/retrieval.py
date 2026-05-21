@@ -131,6 +131,32 @@ def _hybrid_retrieve(query: str, entities: list[Entity]) -> list[ScoredChunk]:
     return filtered[: settings.chunk_top_k]
 
 
+def retrieve_baseline(query: str) -> list[ScoredChunk]:
+    """Pre-GraphRAG baseline: plain vector recall over chunks, no graph.
+
+    Used by the evaluation harness to quantify the recall gain from adding
+    the knowledge graph (entity linking + subgraph expansion).
+    """
+    query_vector = embed_one(query)
+    hits = get_vector_store().search(
+        settings.milvus_chunk_collection,
+        query_vector,
+        settings.chunk_top_k,
+        CHUNK_OUTPUT_FIELDS,
+    )
+    return [
+        ScoredChunk(
+            chunk_id=hit["id"],
+            title=hit.get("title", ""),
+            text=hit.get("text", ""),
+            doc=hit.get("doc", ""),
+            score=round(hit["score"], 4),
+            vec_score=round(hit["score"], 4),
+        )
+        for hit in hits
+    ]
+
+
 def retrieve(query: str, exclude_entities: set[str] | None = None) -> RetrievalResult:
     """Run the full two-stage GraphRAG retrieval pipeline for a user query.
 
