@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Environment
+.env
+backend/.env
+*.local
+
+# Data artifacts (keep raw seed docs, ignore generated indexes)
+data/processed/*
+!data/processed/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Docker volumes
+deploy/volumes/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
