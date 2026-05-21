@@ -1,8 +1,7 @@
 """FastAPI application entry point.
 
-Wires together the GraphRAG online inference pipeline. Feature routers are
-registered as each module is implemented; for now only the health endpoint is
-exposed so the scaffold can boot end to end.
+Wires together the GraphRAG online inference pipeline and exposes the chat,
+session and health endpoints.
 """
 from __future__ import annotations
 
@@ -11,6 +10,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api import chat, session
 from app.config import settings
 
 logging.basicConfig(level=settings.log_level)
@@ -35,7 +35,5 @@ def health() -> dict[str, str]:
     return {"status": "ok", "app": settings.app_name, "env": settings.app_env}
 
 
-# Feature routers (registered as modules land):
-# from app.api import chat, session
-# app.include_router(chat.router)
-# app.include_router(session.router)
+app.include_router(chat.router)
+app.include_router(session.router)
