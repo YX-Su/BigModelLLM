@@ -134,6 +134,32 @@ class GraphStore:
                 for rec in records
             ]
 
+    def all_relations(self, rel_type: str) -> list[Relation]:
+        """Return every relation of a given type — used to load the rule set."""
+        if rel_type not in RELATION_TYPES:
+            raise ValueError(f"unknown relation type: {rel_type}")
+        query = (
+            f"MATCH (s:Entity)-[r:{rel_type}]->(t:Entity) "
+            "RETURN s.entity_id AS source, t.entity_id AS target, r.rule_id AS rule_id"
+        )
+        with self.driver.session() as session:
+            records = session.run(query)
+            return [
+                Relation(
+                    source=rec["source"],
+                    target=rec["target"],
+                    type=rel_type,
+                    rule_id=rec["rule_id"] or "",
+                )
+                for rec in records
+            ]
+
+    def config_item_ids(self) -> set[str]:
+        """Return the ids of every ConfigItem entity in the graph."""
+        with self.driver.session() as session:
+            records = session.run("MATCH (e:ConfigItem) RETURN e.entity_id AS id")
+            return {rec["id"] for rec in records}
+
 
 @lru_cache
 def get_graph_store() -> GraphStore:
