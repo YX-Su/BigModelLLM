@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     api_host: str = "0.0.0.0"
     api_port: int = 8000
 
+    # Mock mode — run the whole pipeline in-memory with no external services
+    # (no Milvus / Elasticsearch / Neo4j / Redis, no LLM API key required).
+    mock_mode: bool = False
+
     # LLM
     llm_base_url: str = "https://api.openai.com/v1"
     llm_api_key: str = "sk-replace-me"

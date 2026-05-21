@@ -44,6 +44,10 @@ def chat(
     max_tokens: int | None = None,
 ) -> str:
     """Run a chat completion and return the assistant message text."""
+    if settings.mock_mode:
+        from app.mock.llm import mock_chat
+
+        return mock_chat(messages)
     response = _llm_client.chat.completions.create(
         model=settings.llm_model,
         messages=messages,
@@ -60,6 +64,10 @@ def chat_json(
     temperature: float = 0.0,
 ) -> Any:
     """Run a chat completion constrained to JSON output and parse the result."""
+    if settings.mock_mode:
+        from app.mock.llm import mock_chat_json
+
+        return mock_chat_json(messages)
     response = _llm_client.chat.completions.create(
         model=settings.llm_model,
         messages=messages,
@@ -79,6 +87,10 @@ def embed(texts: list[str]) -> list[list[float]]:
     """Embed a batch of texts and return their vectors."""
     if not texts:
         return []
+    if settings.mock_mode:
+        from app.mock.llm import mock_embed
+
+        return mock_embed(texts, settings.embedding_dim)
     response = _embedding_client.embeddings.create(
         model=settings.embedding_model,
         input=texts,

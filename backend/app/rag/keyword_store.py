@@ -72,5 +72,10 @@ class KeywordStore:
 
 
 @lru_cache
-def get_keyword_store() -> KeywordStore:
+def get_keyword_store():  # type: ignore[no-untyped-def]
+    """Return the Elasticsearch-backed store, or the in-memory store in mock mode."""
+    if settings.mock_mode:
+        from app.mock.stores import InMemoryKeywordStore
+
+        return InMemoryKeywordStore()
     return KeywordStore()

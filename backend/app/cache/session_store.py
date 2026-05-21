@@ -65,5 +65,10 @@ class SessionStore:
 
 
 @lru_cache
-def get_session_store() -> SessionStore:
+def get_session_store():  # type: ignore[no-untyped-def]
+    """Return the Redis-backed store, or the in-memory store in mock mode."""
+    if settings.mock_mode:
+        from app.mock.stores import InMemorySessionStore
+
+        return InMemorySessionStore()
     return SessionStore()

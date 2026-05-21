@@ -31,6 +31,10 @@ logger = logging.getLogger(__name__)
 # Cap on how many subgraph entities expand the stage-2 query set.
 _MAX_QUERY_EXPANSION = 10
 
+# Relative weight of the user query vs. subgraph-expansion queries in fusion.
+_PRIMARY_WEIGHT = 0.7
+_EXPANSION_WEIGHT = 0.3
+
 
 def link_entities(query: str) -> list[str]:
     """Stage 1a — map the query to standard graph entities via vector search."""
@@ -66,9 +70,15 @@ def _norm(value: float, lo: float, hi: float) -> float:
 
 
 def _hybrid_retrieve(query: str, entities: list[Entity]) -> list[ScoredChunk]:
-    """Stage 2 — subgraph-driven vector + BM25 recall with weighted fusion."""
+    """Stage 2 — subgraph-driven vector + BM25 recall with weighted fusion.
+
+    The user query is the primary retrieval signal; subgraph entity
+    descriptions provide supplementary expansion at a lower weight, so a
+    chunk that merely self-matches an expanded entity cannot outrank a chunk
+    that is genuinely relevant to the user's question.
+    """
     config_entities = [e for e in entities if e.type == "ConfigItem"]
-    query_texts = [query] + [
+    expansion_texts = [
         f"{e.name} {e.description}".strip()
         for e in config_entities[:_MAX_QUERY_EXPANSION]
     ]
@@ -85,37 +95,53 @@ def _hybrid_retrieve(query: str, entities: list[Entity]) -> list[ScoredChunk]:
                 "title": hit.get("title", ""),
                 "text": hit.get("text", ""),
                 "doc": hit.get("doc", ""),
-                "vec_score": 0.0,
+                "primary_vec": 0.0,
+                "expansion_vec": 0.0,
                 "bm25_score": 0.0,
             },
         )
 
-    query_vectors = embed(query_texts)
-    for text, vector in zip(query_texts, query_vectors):
-        for hit in vector_store.search(
-            settings.milvus_chunk_collection, vector, settings.chunk_top_k, CHUNK_OUTPUT_FIELDS
-        ):
-            slot = _slot(hit)
-            slot["vec_score"] = max(slot["vec_score"], hit["score"])
-        for hit in keyword_store.search(
-            settings.es_chunk_index, text, settings.chunk_top_k
-        ):
-            slot = _slot(hit)
-            slot["bm25_score"] = max(slot["bm25_score"], hit["score"])
+    # Primary pass — the user query itself.
+    for hit in vector_store.search(
+        settings.milvus_chunk_collection, embed_one(query), settings.chunk_top_k, CHUNK_OUTPUT_FIELDS
+    ):
+        slot = _slot(hit)
+        slot["primary_vec"] = max(slot["primary_vec"], hit["score"])
+    for hit in keyword_store.search(settings.es_chunk_index, query, settings.chunk_top_k):
+        slot = _slot(hit)
+        slot["bm25_score"] = max(slot["bm25_score"], hit["score"])
+
+    # Expansion pass — subgraph entity descriptions (supplementary signal).
+    if expansion_texts:
+        for vector in embed(expansion_texts):
+            for hit in vector_store.search(
+                settings.milvus_chunk_collection, vector, settings.chunk_top_k, CHUNK_OUTPUT_FIELDS
+            ):
+                slot = _slot(hit)
+                slot["expansion_vec"] = max(slot["expansion_vec"], hit["score"])
+        for text in expansion_texts:
+            for hit in keyword_store.search(settings.es_chunk_index, text, settings.chunk_top_k):
+                slot = _slot(hit)
+                slot["bm25_score"] = max(slot["bm25_score"], hit["score"])
 
     if not pool:
         return []
 
     # Weighted fusion over min-max normalised channel scores.
-    vec_values = [c["vec_score"] for c in pool.values()]
+    primary_values = [c["primary_vec"] for c in pool.values()]
+    expansion_values = [c["expansion_vec"] for c in pool.values()]
     bm25_values = [c["bm25_score"] for c in pool.values()]
-    vec_lo, vec_hi = min(vec_values), max(vec_values)
-    bm25_lo, bm25_hi = min(bm25_values), max(bm25_values)
+    p_lo, p_hi = min(primary_values), max(primary_values)
+    e_lo, e_hi = min(expansion_values), max(expansion_values)
+    b_lo, b_hi = min(bm25_values), max(bm25_values)
 
     scored: list[ScoredChunk] = []
     for cand in pool.values():
-        fused = settings.vector_weight * _norm(cand["vec_score"], vec_lo, vec_hi) + (
-            settings.bm25_weight * _norm(cand["bm25_score"], bm25_lo, bm25_hi)
+        vec_component = _PRIMARY_WEIGHT * _norm(cand["primary_vec"], p_lo, p_hi) + (
+            _EXPANSION_WEIGHT * _norm(cand["expansion_vec"], e_lo, e_hi)
+        )
+        fused = settings.vector_weight * vec_component + (
+            settings.bm25_weight * _norm(cand["bm25_score"], b_lo, b_hi)
         )
         scored.append(
             ScoredChunk(
@@ -124,7 +150,7 @@ def _hybrid_retrieve(query: str, entities: list[Entity]) -> list[ScoredChunk]:
                 text=cand["text"],
                 doc=cand["doc"],
                 score=round(fused, 4),
-                vec_score=round(cand["vec_score"], 4),
+                vec_score=round(cand["primary_vec"], 4),
                 bm25_score=round(cand["bm25_score"], 4),
             )
         )

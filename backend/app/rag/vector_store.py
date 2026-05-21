@@ -83,5 +83,10 @@ class VectorStore:
 
 
 @lru_cache
-def get_vector_store() -> VectorStore:
+def get_vector_store():  # type: ignore[no-untyped-def]
+    """Return the Milvus-backed store, or the in-memory store in mock mode."""
+    if settings.mock_mode:
+        from app.mock.stores import InMemoryVectorStore
+
+        return InMemoryVectorStore()
     return VectorStore()

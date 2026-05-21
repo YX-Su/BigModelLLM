@@ -58,7 +58,29 @@ BigModelLLM/
 └── docs/               架构与设计文档
 ```
 
-## 快速开始
+## 快速体验(Mock 模式)
+
+无需 Docker、数据库或大模型 API Key,完整对话链路在内存中运行,适合本地演示:
+
+```bash
+# 后端
+cd backend
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env          # 默认 MOCK_MODE=false,改成 MOCK_MODE=true
+uvicorn app.main:app --port 8000
+
+# 前端(另开一个终端)
+cd frontend
+npm install
+cp .env.example .env
+npm run dev                   # 访问 http://localhost:5173
+```
+
+Mock 模式启动时在内存中构建知识库(知识图谱 + 检索索引),用确定性的模拟逻辑替代
+向量库、图数据库与大模型,完整跑通意图识别 → GraphRAG 检索 → 生成 → 规则校验链路。
+
+## 快速开始(完整模式)
 
 ```bash
 # 1. 启动存储后端(Milvus / Elasticsearch / Neo4j / Redis)

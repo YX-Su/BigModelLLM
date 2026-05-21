@@ -162,5 +162,10 @@ class GraphStore:
 
 
 @lru_cache
-def get_graph_store() -> GraphStore:
+def get_graph_store():  # type: ignore[no-untyped-def]
+    """Return the Neo4j-backed store, or the in-memory store in mock mode."""
+    if settings.mock_mode:
+        from app.mock.stores import InMemoryGraphStore
+
+        return InMemoryGraphStore()
     return GraphStore()
